@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.ScrollPane?>
+
+
+<ScrollPane fx:id="scrollPane" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.architecture.controllers.GraphicsController">
+   <content>
+      <LineChart fx:id="lineChart" prefHeight="656.0" prefWidth="1028.0" title="Time diagram">
+        <xAxis>
+          <NumberAxis label="Time" side="BOTTOM" upperBound="50.0" />
+        </xAxis>
+        <yAxis>
+          <NumberAxis side="LEFT" />
+        </yAxis>
+      </LineChart>
+   </content>
+</ScrollPane>

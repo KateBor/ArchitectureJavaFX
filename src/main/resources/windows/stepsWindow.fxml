@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="675.0" prefWidth="1178.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1"> <!--fx:controller="com.example.architecture.controllers.StepsController">-->
+   <children>
+      <TableView fx:id="steps" layoutX="51.0" layoutY="51.0" prefHeight="566.0" prefWidth="1077.0">
+        <columns>
+          <TableColumn fx:id="source" prefWidth="79.0" text="Source" />
+            <TableColumn fx:id="device" prefWidth="81.0" text="Device" />
+            <TableColumn fx:id="buffer" prefWidth="74.0" text="Buffer" />
+            <TableColumn fx:id="reqNum" prefWidth="100.0" text="Req Number" />
+          <TableColumn fx:id="time" prefWidth="120.0" text="Time" />
+            <TableColumn fx:id="event" prefWidth="379.0" text="Event" />
+            <TableColumn fx:id="countRequests" prefWidth="127.0" text="requests" />
+            <TableColumn fx:id="countRejection" minWidth="0.0" prefWidth="116.0" text="rejection" />
+        </columns>
+      </TableView>
+      <Label layoutX="555.0" layoutY="14.0" prefHeight="27.0" prefWidth="70.0" text="Steps">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
