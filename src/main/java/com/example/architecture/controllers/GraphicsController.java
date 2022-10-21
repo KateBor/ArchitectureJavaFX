@@ -32,6 +32,13 @@ public class GraphicsController {
         scrollPane.setMinSize(response.getCurrentTime() * 100,600);
         lineChart.setMinSize(scrollPane.getMinWidth(),scrollPane.getMinHeight()-20);
 
+        //отказы
+        XYChart.Series<Number, Number> reject = new XYChart.Series<>();
+        for (var pair : response.rejection) {
+            reject.getData().add(new XYChart.Data<>(pair.getX(), pair.getY()));
+        }
+        lineChart.getData().add(reject);
+
         //источники
         for(int i = 0; i < response.coordinatesSource.size(); i++) {
             XYChart.Series<Number, Number> series = new XYChart.Series<>();

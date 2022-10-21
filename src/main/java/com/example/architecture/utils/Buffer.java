@@ -24,7 +24,7 @@ public class Buffer {
 
     int choosingIterator = -1;
     int insertingIterator = -1;
-    double startHeight;
+    public double startHeight;
     public Map<Integer, List<Coordinate>> coordinates;
 
     public Buffer(int bufferNum, double startHeight) {

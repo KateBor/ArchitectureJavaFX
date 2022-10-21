@@ -4,6 +4,7 @@ import com.example.architecture.messages.EventResponse;
 import com.example.architecture.messages.ExperimentParamsRequest;
 import com.example.architecture.messages.ExperimentResponse;
 import com.example.architecture.messages.GraphicsResponse;
+import com.example.architecture.model.Coordinate;
 import com.example.architecture.model.Event;
 import com.example.architecture.utils.Buffer;
 import com.example.architecture.utils.Device;
@@ -41,6 +42,8 @@ public class Simulation {
     double currentTime;
     int count, countRejection;
 
+    List<Coordinate> rejection;
+
     Double p0;
     Integer N0;
     Buffer buffer;
@@ -59,13 +62,14 @@ public class Simulation {
 
 
     public void startWork(ExperimentParamsRequest request) {
-        buffer = new Buffer(request.getBufferNum(), 10);
-        device = new Device(request.getDeviceNum(), request.getSourceNum(), request.getBufferNum() * 10 + 30);
+        buffer = new Buffer(request.getBufferNum(), 25);
+        device = new Device(request.getDeviceNum(), request.getSourceNum(), buffer.startHeight + request.getBufferNum() * 10 + 20);
         source = new Source(request.getSourceNum(), device.startHeight + request.getDeviceNum() * 10 + 20);
         timeLine = new PriorityQueue<>();
         N0 = request.getEventsNum();
         eventResponse = new EventResponse();
-
+        rejection = new ArrayList<>();
+        rejection.add(new Coordinate(0, 5));
         count = 0;
         currentTime = 0;
         countRejection = 0;
@@ -126,6 +130,7 @@ public class Simulation {
         } else { //?
             if (!buffer.hasEmpty()) {
                 countRejection++;
+                addRejectCoordinates();
                 logger.info("очищаем место в буфере (выбираем самую старую заявку)");
                 double oldestReq = buffer.getOldestRequest();
                 int num = buffer.flush(currentTime);
@@ -138,6 +143,12 @@ public class Simulation {
         } //?
     }
 
+    private void addRejectCoordinates() {
+        rejection.add(new Coordinate(currentTime, 5));
+        rejection.add(new Coordinate(currentTime, 10));
+        rejection.add(new Coordinate(currentTime, 5));
+    }
+
     private void completeRequest(TimeAction timeAction) { //номер прибора
         if (!device.isEmpty()) {
             logger.info("освобождаем прибор");
@@ -148,7 +159,7 @@ public class Simulation {
         if (!buffer.isEmpty()) {
             Integer bufNum = buffer.getNextIndex();
             if (bufNum == null) {
-                logger.warn("result - " + buffer.isEmpty() + "\n array = " + Arrays.toString(buffer.array)); //где то ошибка!!!!!!!!!!!!!!
+                logger.warn("result - " + buffer.isEmpty() + "\n array = " + Arrays.toString(buffer.array));
                 return;
             }
             Double d = buffer.chooseRequest(bufNum, currentTime);
@@ -233,6 +244,6 @@ public class Simulation {
 
 
     public GraphicsResponse getInfoForGraphics() {
-        return new GraphicsResponse(currentTime, source.coordinates, device.coordinates, buffer.coordinates);
+        return new GraphicsResponse(currentTime, source.coordinates, device.coordinates, buffer.coordinates, rejection);
     }
 }

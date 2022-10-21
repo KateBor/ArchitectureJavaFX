@@ -14,4 +14,5 @@ public class GraphicsResponse {
     public Map<Integer, List<Coordinate>> coordinatesSource;
     public Map<Integer, List<Coordinate>> coordinatesDevice;
     public Map<Integer, List<Coordinate>> coordinatesBuffer;
+    public List<Coordinate> rejection;
 }
