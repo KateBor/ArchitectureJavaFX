@@ -17,4 +17,10 @@ public class ExperimentParamsRequest {
     int bufferNum;
     @NonNull
     int eventsNum;
+    @NonNull
+    double alpha;
+    @NonNull
+    double beta;
+    @NonNull
+    double lambda;
 }

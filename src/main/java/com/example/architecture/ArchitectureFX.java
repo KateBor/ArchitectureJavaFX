@@ -88,7 +88,7 @@ public class ArchitectureFX extends Application {
         }
     }
 
-    public void graphicsWindow() { //переделать
+    public void graphicsWindow() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(ArchitectureFX.class.getResource("/windows/graphicsWindow.fxml"));

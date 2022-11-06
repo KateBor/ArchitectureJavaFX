@@ -1,6 +1,7 @@
 package com.example.architecture.utils;
 
 import com.example.architecture.model.Coordinate;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,21 +10,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 public class Device {
     public Map<Integer, List<Double>> timeRequestsByDevice;
     public double startHeight;
     public Map<Integer, List<Coordinate>> coordinates;
     double[] array;
     public double[] workTime;
-    public double[] startTime;
+    //public double[] startTime;
     private static final Logger logger = LoggerFactory.getLogger(Device.class);
     double deltaY = 5;
+//    double a = 0.9; // задаем сами пока что
+//    double b = 1.2;
+    double alpha;
+    double beta;
 
 
-    public Device(int deviceNum, int sourceNum, double startHeight) {
+    public Device(int deviceNum, int sourceNum, double startHeight, double alpha, double beta) {
         array = new double[deviceNum];
         workTime = new double[deviceNum];
-        startTime = new double[deviceNum];
+        //startTime = new double[deviceNum];
+        this.alpha = alpha;
+        this.beta = beta;
         this.startHeight = startHeight;
         coordinates = new HashMap<>();
         timeRequestsByDevice = new HashMap<>();
@@ -63,11 +71,12 @@ public class Device {
         return index;
     }
 
-    public int setSource(double request, double currentTime) {
+    public int setSource(double request, double currentTime) { //переделать в String
         Integer emptyIndex;                                                 //целая часть - номер источника,
         if ((emptyIndex = findFirstEmptyIndex()) != null) {                 //дробная - номер заявки (пакета)
             array[emptyIndex] = request;
             addSetCoordinates(emptyIndex, currentTime);
+            //startTime[emptyIndex] = currentTime;
         } else {
             logger.warn("NoEmptyDeviceException: Can't set source");
             return -1;
@@ -95,11 +104,8 @@ public class Device {
     }
 
 
-    double a = 0.9; // задаем сами пока что
-    double b = 1.2;
-
     public double calculateDeltaTimeEvenly() {
-        return Math.random()*(b - a) + a;
+        return Math.random()*(beta - alpha) + alpha;
     }
 
     public int size() {

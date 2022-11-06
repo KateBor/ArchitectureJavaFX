@@ -12,10 +12,10 @@ public class ArchitectureApp {
         double p0 = 2, p1 = 1;
 
         while (countAccuracy(p0, p1) >= 0.1) {
-            simulation.startWork(new ExperimentParamsRequest(source, device, buff, N0));
+            simulation.startWork(new ExperimentParamsRequest(source, device, buff, N0, 1, 1.1, 0.275));
             p0 = simulation.getP0();
             N0 = simulation.calculateN0();
-            simulation.startWork(new ExperimentParamsRequest(source, device, buff, N0));
+            simulation.startWork(new ExperimentParamsRequest(source, device, buff, N0, 1, 1.1, 0.275));
             N0 = simulation.getN0();
             p1 = simulation.getP0();
          }

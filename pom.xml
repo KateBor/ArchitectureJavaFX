@@ -79,12 +79,6 @@
             </exclusions>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>2.0.0-alpha1</version>
-        </dependency>
 
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -110,6 +104,11 @@
             <artifactId>javafx-graphics</artifactId>
             <version>17-ea+11</version>
         </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>2.0.0-alpha0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -132,7 +131,7 @@
                         <!-- Default configuration for running with: mvn clean javafx:run -->
                         <id>default-cli</id>
                         <configuration>
-                            <mainClass>com.example.architecture.AppFX
+                            <mainClass>com.example.architecture.ArchitectureFX
                             </mainClass>
                         </configuration>
                     </execution>

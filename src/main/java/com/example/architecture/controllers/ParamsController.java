@@ -19,6 +19,13 @@ public class ParamsController {
     @FXML
     private TextField eventsNum;
 
+    @FXML
+    public TextField alpha;
+    @FXML
+    public TextField beta;
+    @FXML
+    public TextField lambda;
+
     private ArchitectureFX architectureFX;
 
     @FXML
@@ -28,7 +35,11 @@ public class ParamsController {
                 Integer.parseInt(sourceNum.getText()),
                 Integer.parseInt(deviceNum.getText()),
                 Integer.parseInt(bufferNum.getText()),
-                Integer.parseInt(eventsNum.getText()));
+                Integer.parseInt(eventsNum.getText()),
+                Double.parseDouble(alpha.getText()),
+                Double.parseDouble(beta.getText()),
+                Double.parseDouble(lambda.getText())
+        );
 
 
         Simulation simulation = new Simulation();
@@ -45,6 +56,7 @@ public class ParamsController {
         }
 
         System.out.println("N = " + req.getEventsNum() + "; p = " + p0 + "; p1 = " + p1);
+        //вывести вводимые параметры
         ExperimentResponse response = simulation.countResults();
         System.out.println(response.toString());
 

@@ -1,12 +1,14 @@
 package com.example.architecture.utils;
 
 import com.example.architecture.model.Coordinate;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Getter
 public class Source {
     public int[] countRequests;
     public double[] workTime;
@@ -16,13 +18,17 @@ public class Source {
     public Map<Integer, List<Coordinate>> coordinates;
     double startHeight;
     double deltaY = 5;
+//    double lm = 1.3; //пока задаем сами
+    double lm; //пока задаем сами
 
-    public Source(int sourceNum, double startHeight) {
+
+    public Source(int sourceNum, double startHeight, double lambda) {
         countRequests = new int[sourceNum];
         workTime = new double[sourceNum];
         waitTime = new double[sourceNum];
         startTime = new double[sourceNum];
         coordinates = new HashMap<>();
+        lm = lambda;
         this.startHeight = startHeight;
 
         timeRequestsBySource = new HashMap<>();
@@ -39,10 +45,10 @@ public class Source {
             requestNumber /= 10;
         }
         addCoordinates(sourceNumber, currentTime);
+        startTime[sourceNumber] = currentTime;
         return (double) sourceNumber + requestNumber;
     }
 
-    double lm = 1.3; //пока задаем сами
     public double deltaTimePoisson() {
         return -1 / lm * Math.log(Math.random()); // r -> [0; 1]
     }

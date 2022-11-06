@@ -83,22 +83,6 @@ public class Buffer {
         return set.isEmpty();
     }
 
-    private Double getNext() { //по кольцу
-        choosingIterator++;
-        for (int i = 0; i < array.length; i++) {
-            if (choosingIterator >= array.length) {
-                choosingIterator = 0;
-            }
-            if (array[choosingIterator] != 0) {
-                Double d = array[choosingIterator];
-                set.remove(d);
-                array[choosingIterator] = 0;
-                return d;
-            }
-            choosingIterator++;
-        }
-        return null;
-    }
     public Integer getNextIndex() {
         choosingIterator++;
         for (int i = 0; i < array.length; i++) {
@@ -111,14 +95,6 @@ public class Buffer {
             choosingIterator++;
         }
         return null;
-    }
-
-    public Double chooseRequest() { //по кольцу
-        Double rez = getNext();
-        if (rez == null) {
-            logger.warn("EmptyBufferException: Can't choose request");
-        }
-        return rez;
     }
 
     public Double chooseRequest(int index, double currentTime) { //по кольцу
@@ -149,5 +125,9 @@ public class Buffer {
         }
         assert queue.peek() != null;
         return queue.peek().value;
+    }
+
+    public int size() {
+        return array.length;
     }
 }

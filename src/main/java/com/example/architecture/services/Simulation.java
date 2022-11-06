@@ -63,8 +63,12 @@ public class Simulation {
 
     public void startWork(ExperimentParamsRequest request) {
         buffer = new Buffer(request.getBufferNum(), 25);
-        device = new Device(request.getDeviceNum(), request.getSourceNum(), buffer.startHeight + request.getBufferNum() * 10 + 20);
-        source = new Source(request.getSourceNum(), device.startHeight + request.getDeviceNum() * 10 + 20);
+
+        device = new Device(request.getDeviceNum(), request.getSourceNum(),
+                    buffer.startHeight + request.getBufferNum() * 10 + 20,
+                            request.getAlpha(), request.getBeta());
+        source = new Source(request.getSourceNum(), device.startHeight + request.getDeviceNum() * 10 + 20,
+                            request.getLambda());
         timeLine = new PriorityQueue<>();
         N0 = request.getEventsNum();
         eventResponse = new EventResponse();
@@ -76,17 +80,20 @@ public class Simulation {
 
         //запуск источников
         for (; count < request.getSourceNum(); count++) {
-
-            double req = source.createRequest(count, currentTime);
-            device.setSource(req, currentTime);
-            eventResponse.add(new Event("И" + count, "П" + count, null, req, currentTime, newReq + whereDev, count, countRejection));
-            timeLine.add(new TimeAction(currentTime + source.deltaTimePoisson(), 0, count));
+            timeLine.add(new TimeAction(0.0, 0, count));
 
 
-            int devNum = count % device.size();
-            double time = device.calculateDeltaTimeEvenly();
-            device.sumWorkTime(devNum, count, time); //источников может быть больше чем приборов
-            timeLine.add(new TimeAction(currentTime + time, 1, devNum));
+//            double req = source.createRequest(count, currentTime);
+//            device.setSource(req, currentTime);
+//            eventResponse.add(new Event("И" + count, "П" + count, null, req, currentTime,
+//                                        newReq + whereDev, count, countRejection));
+//            timeLine.add(new TimeAction(currentTime + source.deltaTimePoisson(), 0, count));
+//
+//
+//            int devNum = count % device.size();
+//            double time = device.calculateDeltaTimeEvenly();
+//            //device.sumWorkTime(devNum, count, time); //источников может быть больше чем приборов
+//            timeLine.add(new TimeAction(currentTime + time, 1, devNum));
         }
 
 
@@ -110,8 +117,6 @@ public class Simulation {
     private void addNewRequest(TimeAction timeAction) {
         logger.info("создаем новую заявку");
         double req = source.createRequest(timeAction.toolNum, currentTime);
-        source.startTime[timeAction.toolNum] = currentTime;
-
         count++;
         double time;
         if (count < N0) {
@@ -122,23 +127,27 @@ public class Simulation {
         if (device.hasEmpty()) {
             logger.info("добавляем заявку сразу на прибор");
             int num = device.setSource(req, currentTime);
-            device.startTime[num] = currentTime;
+
             time = device.calculateDeltaTimeEvenly();
             device.sumWorkTime(num, timeAction.toolNum, time);
-            eventResponse.add(new Event("И" + timeAction.toolNum, "П" + num, null, req, currentTime, newReq + whereDev, count, countRejection));
+            eventResponse.add(new Event("И" + timeAction.toolNum, "П" + num, null, req, currentTime,
+                                    newReq + whereDev, count, countRejection));
             timeLine.add(new TimeAction(currentTime + time, 1, num));
         } else { //?
             if (!buffer.hasEmpty()) {
                 countRejection++;
                 addRejectCoordinates();
-                logger.info("очищаем место в буфере (выбираем самую старую заявку)");
+                logger.info("очищаем место в буфере (выбираем самую старую заявку)"); //суммировать буферное время
                 double oldestReq = buffer.getOldestRequest();
                 int num = buffer.flush(currentTime);
-                eventResponse.add(new Event(null, null, "Б" + num, oldestReq, currentTime, reject, count, countRejection));
+                //source.sumWaitTime(num, currentTime - source.startTime[num]); - плохая идея
+                eventResponse.add(new Event(null, null, "Б" + num, oldestReq, currentTime, reject,
+                                            count, countRejection));
             }
             logger.info("добавляем заявку в буфер");
             int num = buffer.setSource(req, currentTime);
-            eventResponse.add(new Event("И" + timeAction.toolNum, null, "Б" + num, req, currentTime, newReq + whereBuf, count, countRejection));
+            eventResponse.add(new Event("И" + timeAction.toolNum, null, "Б" + num, req, currentTime,
+                                newReq + whereBuf, count, countRejection));
 
         } //?
     }
@@ -153,7 +162,8 @@ public class Simulation {
         if (!device.isEmpty()) {
             logger.info("освобождаем прибор");
             double oldReq = device.flush(timeAction.toolNum, currentTime);
-            eventResponse.add(new Event(null, "П" + timeAction.toolNum, null, oldReq, currentTime, flushDev, count, countRejection));
+            eventResponse.add(new Event(null, "П" + timeAction.toolNum, null, oldReq, currentTime,
+                                    flushDev, count, countRejection));
         }
 
         if (!buffer.isEmpty()) {
@@ -167,14 +177,14 @@ public class Simulation {
                 logger.info("добавляем на прибор заявку из буфера");
                 int num = device.setSource(d, currentTime);
                 int index = source.getNumSource(d);
-                double delta = currentTime - source.startTime[index];
                 double time = device.calculateDeltaTimeEvenly();
 
                 source.sumWorkTime(index, time);
-                source.sumWaitTime(index, delta);
-                device.sumWorkTime(timeAction.toolNum, index, delta);
+                source.sumWaitTime(index, currentTime - source.startTime[index]);
+                device.sumWorkTime(timeAction.toolNum, index, time);
 
-                eventResponse.add(new Event(null, "П" + num, "Б" + bufNum, d, currentTime, bufReq + whereDev, count, countRejection));
+                eventResponse.add(new Event(null, "П" + num, "Б" + bufNum, d, currentTime,
+                                        bufReq + whereDev, count, countRejection));
                 timeLine.add(new TimeAction(currentTime + time, 1, timeAction.toolNum));
             }
         }
@@ -209,6 +219,14 @@ public class Simulation {
         for (int i = 0; i < resultSource.length; i++) {
             resultSource[i][0] = source.countRequests[i];
             resultSource[i][1] = (source.countRequests[i] - source.timeRequestsBySource.get(i).size()) / resultSource[i][0];
+            if (resultSource[i][1] == 1) {
+                resultSource[i][3] = 0;
+                resultSource[i][4] = 0;
+                resultSource[i][2] = 0;
+                resultSource[i][5] = 0;
+                resultSource[i][6] = 0;
+                continue;
+            }
 
             resultSource[i][3] = source.waitTime[i] / source.timeRequestsBySource.get(i).size();
             resultSource[i][4] = source.workTime[i] / source.timeRequestsBySource.get(i).size();
@@ -239,7 +257,7 @@ public class Simulation {
         for (int i = 0; i < resultDevice.length; i++) {
             resultDevice[i] = device.workTime[i] / currentTime;
         }
-        return new ExperimentResponse(resultSource, resultDevice, N0, p0);
+        return new ExperimentResponse(resultSource, resultDevice, N0, p0, buffer.size(), device.getAlpha(), device.getBeta(), source.getLm());
     }
 
 
