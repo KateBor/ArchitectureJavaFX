@@ -1,31 +1,51 @@
 package com.example.architecture;
 
 import com.example.architecture.messages.ExperimentParamsRequest;
+import com.example.architecture.messages.ExperimentResponse;
 import com.example.architecture.services.Simulation;
+
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class ArchitectureApp {
 
-    public static void main(String[] args) {
-        Simulation simulation = new Simulation();
+    public static void main(String[] args) throws IOException {
 
-        int N0 = 5000, source = 4, device = 5, buff = 6;
-        double p0 = 2, p1 = 1;
-
-        while (countAccuracy(p0, p1) >= 0.1) {
-            simulation.startWork(new ExperimentParamsRequest(source, device, buff, N0, 1, 1.1, 0.275));
-            p0 = simulation.getP0();
-            N0 = simulation.calculateN0();
-            simulation.startWork(new ExperimentParamsRequest(source, device, buff, N0, 1, 1.1, 0.275));
-            N0 = simulation.getN0();
-            p1 = simulation.getP0();
-         }
-
-        System.out.println("N = " + N0 + "; p = " + p0 + "; p1 = " + p1);
-        System.out.println(simulation.countResults().toString());
+        int[] devArr = new int[]{
+                152, 267, 224
+        };
+        int bufMin = 10, bufMax = 200;
+        int devMin = 4, devMax = 270;
+        int buf = bufMin;
+        double alpha = 2, beta = 2, lambda = 0.0025;
+        FileWriter writer0 = new FileWriter("src/small.txt", true);
+        int src = 50000;
+        int N0 = src * 100;
+        for (int i = 0; i < 3; i++) {
+            int countAns = 0;
+            int dev = devArr[i];
+            for (; buf < bufMax && countAns < 3; buf++) {
+                Simulation simulation = new Simulation();
+                simulation.startWork(new ExperimentParamsRequest(src, dev, buf, N0, alpha, beta, lambda));
+                double p0 = simulation.getP0();
+                ExperimentResponse resp = simulation.countResults();
+                if (p0 <= 0.1) {
+                    //записывать каждый раз
+                    countAns++;
+                    String ans = src + "; " + dev + "; " + buf + "; " + p0 + "; " +
+                            resp.getTpreb() + "; " + resp.getKisp() + ";\n";
+                    writer0.write(ans);
+                    writer0.flush();
+                    System.out.println("+");
+                } else if (p0 > 0.15) {
+                    break;
+                }
+            }
+            buf = bufMin;
+        }
     }
 
     private static double countAccuracy(double p0, double p1) {
         return Math.abs(p0 - p1) / p0;
     }
-
 }

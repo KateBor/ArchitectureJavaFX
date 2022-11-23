@@ -18,8 +18,7 @@ public class Source {
     public Map<Integer, List<Coordinate>> coordinates;
     double startHeight;
     double deltaY = 5;
-//    double lm = 1.3; //пока задаем сами
-    double lm; //пока задаем сами
+    double lm;
 
 
     public Source(int sourceNum, double startHeight, double lambda) {
@@ -49,8 +48,8 @@ public class Source {
         return (double) sourceNumber + requestNumber;
     }
 
-    public double deltaTimePoisson() {
-        return -1 / lm * Math.log(Math.random()); // r -> [0; 1]
+    public double deltaTimePoisson() { // должен генерировать в среднем раз в 2.5 минуты
+        return -1 / lm * Math.log(Math.random());// r -> [0; 1]
     }
 
     public int size() {

@@ -80,22 +80,9 @@ public class Simulation {
 
         //запуск источников
         for (; count < request.getSourceNum(); count++) {
-            timeLine.add(new TimeAction(0.0, 0, count));
-
-
-//            double req = source.createRequest(count, currentTime);
-//            device.setSource(req, currentTime);
-//            eventResponse.add(new Event("И" + count, "П" + count, null, req, currentTime,
-//                                        newReq + whereDev, count, countRejection));
-//            timeLine.add(new TimeAction(currentTime + source.deltaTimePoisson(), 0, count));
-//
-//
-//            int devNum = count % device.size();
-//            double time = device.calculateDeltaTimeEvenly();
-//            //device.sumWorkTime(devNum, count, time); //источников может быть больше чем приборов
-//            timeLine.add(new TimeAction(currentTime + time, 1, devNum));
+            timeLine.add(new TimeAction(currentTime, 0, count));
+            currentTime += 2;
         }
-
 
         while (!timeLine.isEmpty()) {
             logger.info("итерация: " + count);
@@ -110,8 +97,11 @@ public class Simulation {
                         completeRequest(timeAction);
             }
         }
+        System.out.println("count: " + count);
+        System.out.println("reject count: " + countRejection);
         p0 = calculateP0();
     }
+
 
 
     private void addNewRequest(TimeAction timeAction) {
@@ -119,7 +109,7 @@ public class Simulation {
         double req = source.createRequest(timeAction.toolNum, currentTime);
         count++;
         double time;
-        if (count < N0) {
+        if (count <= N0) {
             time = source.deltaTimePoisson();
             timeLine.add(new TimeAction(currentTime + time, 0, timeAction.toolNum));
         }
@@ -127,20 +117,22 @@ public class Simulation {
         if (device.hasEmpty()) {
             logger.info("добавляем заявку сразу на прибор");
             int num = device.setSource(req, currentTime);
-
             time = device.calculateDeltaTimeEvenly();
+
+            source.sumWaitTime(timeAction.toolNum, 0);
+            source.sumWorkTime(timeAction.toolNum, time);
+
             device.sumWorkTime(num, timeAction.toolNum, time);
             eventResponse.add(new Event("И" + timeAction.toolNum, "П" + num, null, req, currentTime,
                                     newReq + whereDev, count, countRejection));
             timeLine.add(new TimeAction(currentTime + time, 1, num));
-        } else { //?
+        } else {
             if (!buffer.hasEmpty()) {
                 countRejection++;
                 addRejectCoordinates();
                 logger.info("очищаем место в буфере (выбираем самую старую заявку)"); //суммировать буферное время
                 double oldestReq = buffer.getOldestRequest();
                 int num = buffer.flush(currentTime);
-                //source.sumWaitTime(num, currentTime - source.startTime[num]); - плохая идея
                 eventResponse.add(new Event(null, null, "Б" + num, oldestReq, currentTime, reject,
                                             count, countRejection));
             }
@@ -149,7 +141,7 @@ public class Simulation {
             eventResponse.add(new Event("И" + timeAction.toolNum, null, "Б" + num, req, currentTime,
                                 newReq + whereBuf, count, countRejection));
 
-        } //?
+        }
     }
 
     private void addRejectCoordinates() {
@@ -195,7 +187,7 @@ public class Simulation {
     double si = 0.1;
 
     private double calculateP0() {
-        return (double) countRejection / count;
+        return (double) countRejection / N0;
     }
 
     public int calculateN0() {
@@ -228,7 +220,7 @@ public class Simulation {
                 continue;
             }
 
-            resultSource[i][3] = source.waitTime[i] / source.timeRequestsBySource.get(i).size();
+            resultSource[i][3] = source.waitTime[i] / source.timeRequestsBySource.get(i).size(); //время ожидания может быть 0
             resultSource[i][4] = source.workTime[i] / source.timeRequestsBySource.get(i).size();
             resultSource[i][2] = resultSource[i][3] + resultSource[i][4];
 

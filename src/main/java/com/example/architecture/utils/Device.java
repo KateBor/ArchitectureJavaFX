@@ -17,11 +17,8 @@ public class Device {
     public Map<Integer, List<Coordinate>> coordinates;
     double[] array;
     public double[] workTime;
-    //public double[] startTime;
     private static final Logger logger = LoggerFactory.getLogger(Device.class);
     double deltaY = 5;
-//    double a = 0.9; // задаем сами пока что
-//    double b = 1.2;
     double alpha;
     double beta;
 
@@ -29,7 +26,6 @@ public class Device {
     public Device(int deviceNum, int sourceNum, double startHeight, double alpha, double beta) {
         array = new double[deviceNum];
         workTime = new double[deviceNum];
-        //startTime = new double[deviceNum];
         this.alpha = alpha;
         this.beta = beta;
         this.startHeight = startHeight;
@@ -71,12 +67,11 @@ public class Device {
         return index;
     }
 
-    public int setSource(double request, double currentTime) { //переделать в String
+    public int setSource(double request, double currentTime) {
         Integer emptyIndex;                                                 //целая часть - номер источника,
         if ((emptyIndex = findFirstEmptyIndex()) != null) {                 //дробная - номер заявки (пакета)
             array[emptyIndex] = request;
             addSetCoordinates(emptyIndex, currentTime);
-            //startTime[emptyIndex] = currentTime;
         } else {
             logger.warn("NoEmptyDeviceException: Can't set source");
             return -1;
